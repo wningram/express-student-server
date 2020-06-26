@@ -1,0 +1,30 @@
+{
+  "name": "express-student-server",
+  "version": "1.0.0",
+  "description": "Express server for students database",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wningram/express-student-server.git"
+  },
+  "keywords": [
+    "training",
+    "walkthrough"
+  ],
+  "author": "Nick Ingram",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wningram/express-student-server/issues"
+  },
+  "homepage": "https://github.com/wningram/express-student-server#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "jest": "^26.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
