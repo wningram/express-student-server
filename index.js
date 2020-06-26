@@ -1,6 +1,5 @@
 const Student = require("./student");
 const express = require("express");
-const { response } = require("express");
 const app = express();
 const port = 8080;
 
