@@ -4,7 +4,8 @@
   "description": "Express server for students database",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -22,7 +23,8 @@
   "homepage": "https://github.com/wningram/express-student-server#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "jest": "^26.1.0"
+    "jest": "^26.1.0",
+    "pg": "^8.2.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"

@@ -1,5 +1,7 @@
 const Student = require("./student");
+const utils = require("./utils");
 const express = require("express");
+const db = require("./db");
 const app = express();
 const port = 8080;
 
@@ -11,52 +13,58 @@ const students = [
 ];
 
 app.get("/", (req, resp) => {
-    resp.send("Hello");
+    let data = utils.GetData();
+    resp.json(data);
 });
 
 app.get("/students", (req, resp) => {
-    if (req.query.search) {
-        let result = students.find((val, ndx, obj) => {
-            return val.name.toLowerCase().match(new RegExp(`.*${req.query.search}.*`));
+    let search = req.query.search;
+    if (search) {
+        db.query(`SELECT * FROM students WHERE name LIKE '%${search}%'`, (err, result) => {
+            if (err) throw err;
+            console.log(result.rows);
+            if (result.rows.length > 0) {
+                resp.json(result.rows[0]);
+            }
+            else
+                resp.status(404).send("No students found.");
         });
-        if (result)
-            resp.send("Student: " + result.name);
-        else
-            resp.status(404).send("No students found.");
     } else {
-        let result = "Students:<br/><br/>";
-        for (let student of students) {
-            result += `${student.name}<br/>`;
-        }
-        resp.send(result);
+        db.query("SELECT * FROM students", (err, result) => {
+            if (err) throw err;
+            if (result.rows) resp.json(result.rows);
+            else resp.send("THere are no records.");
+        })
     }
-});
+})
 
 app.get("/students/:studentId", (req, resp) => {
     let studentId = req.params.studentId;
-    let result = students.find((val, ndx, obj) => {
-        return val.id == studentId;
+    db.query("SELECT * FROM students WHERE id = " + studentId, (err, result) => {
+        if (err) throw err;
+        console.log(result.rows);
+        if (result.rows.length != 0) {
+            resp.json(result.rows);
+        } else {
+            resp.status(404).send(`Could not find student with Id '${studentId}'.`);
+        }
     });
-    console.log(result);
-    if (result)
-        resp.json(result);
-    else
-        resp.status(404).send(`Student with Id '${studentId}' does not exist.`);
 });
 
 app.get("/grades/:studentId", (req, resp) => {
     let studentId = req.params.studentId;
-    let result = students.find((val) => {
-        return val.id == studentId
+    db.query("SELECT * FROM students WHERE id = " + studentId, (err, result) => {
+        if (err) throw err;
+        console.log(result.rows);
+        if (result.rows.length > 0) {
+            resp.json({
+                student: result.rows[0].name,
+                grades: result.rows[0].grades
+            });
+        } else {
+            resp.status(404).send(`Could not find student with Id '${studentId}'.`);
+        }
     });
-    console.log(result);
-    if (result)
-        resp.json({
-            student: result.name,
-            grades: result.grade
-        });
-    else
-        resp.status(404).send(`Student with Id '${studentId}' does not exist.`);
 });
 
 app.post("/grades", (req, resp) => {
@@ -66,15 +74,19 @@ app.post("/grades", (req, resp) => {
         resp.status(400).send("Invalid arguments.");
         return;
     }
-    let student = students.find((val) => val.id == studentId);
-    console.log(student);
-    if (student) {
-        resp.status(200).json({
-            response: 200
-        });
-    } else {
-        resp.status(404).send(`Student with Id '${studentId}' does not exist.`);
-    }
+    db.query(`SELECT * FROM students WHERE id = ${studentId}`, (err, result) => {
+        if (err) throw err;
+        console.log(result.rows);
+        if (result.rows.length > 0) {
+            db.query(`UPDATE students SET grades = CONCAT(grades, ', ${grade}') WHERE id = ${studentId}`, (err, result) => {
+                if (err) throw err;
+                console.log(result.rows);
+                resp.sendStatus(200);
+            });
+        } else {
+            resp.status(404).send(`Could not find user with Id '${studentId}'.`);
+        }
+    });
 });
 
 app.post("/register", (req, resp) => {
@@ -87,13 +99,17 @@ app.post("/register", (req, resp) => {
     }
 
     // Check if student id already exists
-    let student = students.find((val) => val.id == studentId);
-    if (student) {
-        resp.status(409).send(`User with Id '${studentId}' already exists.`);
-        return;
-    } else {
-        resp.status(200).json({response: 200});
-    }
+    db.query(`SELECT * FROM students WHERE id = ${studentId}`, (err, result) => {
+        if (err) throw err;
+        if (result.rows.length > 0) {
+            resp.status(409).send(`User with Id '${studentId}' already exists.`);
+        } else {
+            db.query(`INSERT INTO students VALUES (${studentId}, '${name}', '', '${email}')`, (err, result) => {
+                if (err) throw err;
+                resp.sendStatus(201);
+            });
+        }
+    });
 });
 
 app.listen(port);

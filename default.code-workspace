@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "..\\USAF-gmdb-docker-db"
+		}
+	],
+	"settings": {}
+}
