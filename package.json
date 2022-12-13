@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/wningram/express-student-server#readme",
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "jest": "^26.1.0",
     "pg": "^8.2.1"
   },
